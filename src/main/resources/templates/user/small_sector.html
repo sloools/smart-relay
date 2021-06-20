@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>미니 프로젝트</title>
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <style>
+        #part1{
+            display: inline-block;
+            text-align: left;
+            background-color:white;
+            border: 0px;
+            padding-left: 5px;
+            color:lightskyblue;
+            font-weight: bold;
+            box-shadow: ghostwhite;
+        }
+
+        #part2{
+            color: white;
+            display: inline-block;
+            text-align: right;
+        }
+
+        #bbttnn2{
+            background-color: red;
+            border-color : red;
+        }
+        #part3{
+            border: none;
+        }
+
+        .custom-input{
+            background-color: whitesmoke;
+            border: 0.2px;
+            margin-bottom: 5px;
+        }
+
+        .custom-btn{
+            margin-left: 5px;
+            margin-right:3px;
+            border: 0px;
+            background-color: aqua;
+        }
+
+        .left-half{
+            width: 60%;
+            display: inline-block;
+        }
+
+        .right-half{
+            width: 30%;
+            text-align:right;
+            display: inline-block;
+        }
+
+        .right-block{
+            width: 20%;
+            display: inline-block;
+            border : 1px solid blue;
+            background-color: blue;
+            color : white;
+            text-align :center;
+        }
+
+        .right-block-no{
+            width: 20%;
+            display: inline-block;
+            border : 1px solid red;
+            background-color: red;
+            color : white;
+            text-align :center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 상단 메뉴 부분 -->
+<nav class="navbar navbar-expand-md bg-dark navbar-dark fixed-top shadow-lg">
+    <a class="navbar-brand" th:href="@{/user/lsec}">SMART-RELAY</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item" th:if="${loginUser.isLoginFlg() == true}">
+                <a th:href="@{/user/lsec}" class="nav-link">메인화면</a>
+            </li>
+            <li class="nav-item" th:if="${loginUser.isLoginFlg() == false}">
+                <a th:href="@{/user/login}" class="nav-link">로그인</a>
+            </li>
+            <li class="nav-item" th:if="${loginUser.isLoginFlg() == true}">
+                <a th:href="@{/user/logout}" class="nav-link">로그아웃</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- 게시글 리스트 -->
+<div class="container" style="margin-top:100px">
+    <div class="card" id="part3">
+        <div id="part1"><button id="bbttnn1" class="btn btn-primary">◀</button></div>
+        <div id="part2"><button id="bbttnn2" class="btn btn-primary">장소삭제</button></div>
+    </div>
+    <div class="card shadow">
+        <div class="card-body">
+            <h4 class="card-title" th:text="${targetPlace}"></h4>
+            <table class="table table-hover" id='board_list'>
+                <thead>
+                <tr>
+                    <th class="w-50">디바이스 위치</th>
+                </tr>
+                </thead>
+                <tbody id="lsec">
+                <tr th:each="place : ${loginUser.getSmallSector()}">
+                    <td>
+                        <div class="left-half"><a th:href="@{/user/detail(smallSector=${place},largeSector=${targetPlace})}" th:text="${place}"></a></div>
+                        <div th:if="${deviceStatusMap.get(place) != null && deviceStatusMap.get(place).size() > 1}" class="right-half">
+                            <div class="right-block"  th:each="status  : ${deviceStatusMap.get(place)}">
+                                <span th:text="${status}"></span>
+                            </div>
+                        </div>
+                                <div th:if="${deviceStatusMap.get(place) != null && deviceStatusMap.get(place).size() <= 1}" class="right-half">
+                            <div class="right-block-no">
+                            <span>X</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="text-right">
+                <button id="add" class="btn btn-primary">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+
+
+
+    var history_back_btn = document.getElementById("bbttnn1");
+    history_back_btn.addEventListener("click", function(){
+        location.href = "/user/lsec";
+    });
+
+    var del_btn = document.getElementById("bbttnn2");
+    del_btn.addEventListener("click", function(){
+       var flg = confirm("삭제하면 해당 장소와 그곳에 등록된 모든 디바이스들이 사라집니다. 삭제하시겠습니까?");
+       if(flg == true){
+          alert("삭제 로직");
+       }else{
+
+       }
+    });
+
+    var largeSector = [[${targetPlace}]];
+    var flg = true;
+    var upTemplate = '    <tr id="q">\n' +
+        '                    <td>' +
+        '<input placeholder="위치이름" id="newplace" name="place" class="custom-input" type="text"/>';
+
+    var deviceLists = [[${loginUser.getDeviceIdList}]];
+    var options = '';
+    if(deviceLists.length == 0){
+        options += '<option value="">디바이스 여분없음</option>'
+    }else{
+        options = '<option value="">디바이스 선택</option>';
+        deviceLists.forEach(function(dev){
+            options += ('<option value="' + dev + '">' + dev + '</option>');
+        })
+    }
+
+    var optionTemplate = '<select name = "deviceId">' +
+        options +
+        '</select>' ;
+
+    var bottomTemplate =  '<button type="button" id="send" onclick="postIt()" class="custom-btn">확인</button><button type="button" onclick="removeIt()"id="clear" class="custom-btn">취소</button></td>\n' +
+        '                </tr>';
+
+    var template = upTemplate + optionTemplate + bottomTemplate;
+
+    var url = /*[[@{/user/ssec/add}]]*/ '';
+
+    console.log(url);
+    $("#add").on("click", function(){
+        if(flg == true){
+            $("#lsec").append(template);
+            flg = false;
+        }
+    });
+
+
+    function removeIt(){
+        $("#q").remove();
+        flg = true;
+    }
+
+    function postIt(){
+
+
+        var postFlg = confirm("추가하시겠습니까?");
+        if(postFlg){
+            var value = document.getElementById("newplace").value;
+            var newForm = document.createElement('form');
+            newForm.name = "newForm";
+            newForm.method = "post"
+            newForm.action = url;
+            var input1 = document.createElement('input');
+            var input2 = document.createElement('input');
+            var input3 = document.createElement('input');
+            input1.setAttribute("type", "hidden");
+            input1.setAttribute("name","largeSector");
+            input1.setAttribute("value", largeSector);
+            input2.setAttribute("type", "hidden");
+            input2.setAttribute("name","smallSector");
+            input2.setAttribute("value", value);
+            input3.setAttribute("type", "hidden");
+            input3.setAttribute("name","deviceId");
+            input3.setAttribute("value", document.getElementsByName("deviceId")[0].value);
+            newForm.append(input1);
+            newForm.append(input2);
+            newForm.append(input3);
+            document.body.append(newForm);
+            newForm.submit();
+        }else{
+            document.getElementById("newplace").value = "";
+        }
+    }
+
+</script>
+</body>
+</html>
+
+
+
+
+
+

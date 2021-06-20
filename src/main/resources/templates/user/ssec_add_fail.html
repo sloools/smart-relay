@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<script type="text/javascript" th:inline="javascript">
+    var url = /*[[@{/user/ssec}]]*/ '';
+    var message = [[${message}]];
+    var lsec = [[${lsec}]];
+    alert(message);
+    location.href = url + "?lsec=" + lsec;
+</script>
+</html>
