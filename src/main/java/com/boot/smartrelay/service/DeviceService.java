@@ -17,4 +17,6 @@ public interface DeviceService {
     List<Packet> getOrderIfPresent(String deviceId);
 
     PacketList getLastOrderByDeviceId(String deviceId);
+    
+    boolean scheduledupcheck(String schedule) throws ParseException;
 }
