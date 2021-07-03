@@ -20,4 +20,6 @@ public interface UserService {
     public ResponseBox insertDevice(String userId, String largeSector, String smallSector, String deviceId);
 
     public List<Device> selectDeviceByUserId(String userId);
+    
+    boolean scheduledupcheck(String schedule) throws ParseException;
 }
