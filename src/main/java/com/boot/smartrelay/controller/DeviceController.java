@@ -59,6 +59,19 @@ public class DeviceController {
             //TODO 예외처리 하기
             return "ERROR";
         }
+        
+         // 스케줄 시간 검증 로직
+        boolean scheduleValidation;
+		try {
+			scheduleValidation = deviceService.scheduledupcheck(packet.getSchedule());
+			if(!scheduleValidation) {
+				return "ERROR";
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
         deviceService.setNewOrder(deviceId, makePacketList(channel, packet));
         model.addAttribute("message", "스케쥴 모드 모드 설정이 완료되었습니다.");
         return "user/order_add_success";
